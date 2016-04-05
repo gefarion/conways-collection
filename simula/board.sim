@@ -1,0 +1,38 @@
+class Board(rows, cols); integer rows,cols;
+begin
+	integer array matrix(1 : rows*cols);
+
+	Boolean procedure in_range(row, col); integer row, col;
+	begin
+		in_range := 1 LE row AND 1 LE col AND row LE rows AND col LE cols;
+	end;
+
+	integer procedure index(row, col); integer row, col;
+	begin
+		index := (row - 1) * cols + col;
+	end;
+
+	integer procedure value_or_zero(row, col); integer row, col;
+	begin
+		if in_range(row, col) then
+			value_or_zero := matrix(index(row, col))
+		else
+			value_or_zero := 0;
+	end;
+
+	procedure set_value(row, col, val); integer row, col, val;
+	begin
+		if in_range(row, col) then matrix(index(row, col)) := val;
+	end;
+
+	procedure print(space); integer space;
+	begin
+		integer r, c;
+		for r := 1 step 1 until rows do
+		begin
+			for c:= 1 step 1 until cols do
+				OutInt(value_or_zero(r, c), space);
+			OutImage;
+		end;
+	end;
+end-of-Board;

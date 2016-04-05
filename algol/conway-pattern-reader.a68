@@ -1,0 +1,41 @@
+#! /usr/local/bin/a68g --script #
+
+COMMENT
+	Procedures:
+		- conway_pattern_reader_new_world(file_name)
+COMMENT
+
+PROC conway_pattern_reader_read = (REF FILE file, REF CONWAY cw) VOID : (
+	
+	INT row := conway_rows(cw) % 5;
+	BOOL end := FALSE;
+	WHILE NOT end DO
+		STRING line; 
+		get(file, (line, new line));
+
+		IF line[1] NE "!" THEN
+			FOR col TO UPB line DO
+				IF line[col] EQ "O" THEN
+					conway_toggle(cw, row, col + conway_cols(cw) % 5)
+				FI
+			OD;
+			row +:= 1
+		FI;
+		end := eof(file)
+	OD;
+	cw
+);
+
+PROC conway_pattern_reader_new_world = (STRING file_name, INT rows, INT cols) REF CONWAY : (
+	
+	REF CONWAY cw := conway_new(rows, cols);
+	FILE input;
+	IF open(input, file_name, stand in channel) EQ 0 THEN
+		conway_pattern_reader_read(input, cw)
+	ELSE
+		print (("Error reading input file: ", file_name))
+	FI;
+	cw
+);
+
+SKIP

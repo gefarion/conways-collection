@@ -1,0 +1,55 @@
+external class Board;
+
+class Conway(rows, cols); integer rows, cols;
+begin
+	ref(Board) world;
+	ref(Board) surrogate;
+
+	integer procedure toggle(row, col); integer row, col;
+	begin
+		integer old;
+		old := world.value_or_zero(row, col);
+		world.set_value(row, col, 1 - old);
+		toggle := old;
+	end;
+
+	integer procedure evolved(row, col); integer row, col;
+	begin
+		integer i, j, cell, neighbors;
+		cell := world.value_or_zero(row, col);
+		neighbors := -cell;
+		for i := -1 step 1 until 1 do
+			for j := -1 step 1 until 1 do
+				neighbors := neighbors + world.value_or_zero(row + i, col + j);
+		evolved := if neighbors EQ 2 then cell else if neighbors EQ 3 then 1 else 0;
+	end;
+
+	procedure flip_worlds;
+	begin
+		ref(Board) backup;
+		backup :- surrogate;
+		surrogate :- world;
+		world :- backup;
+	end;
+
+	procedure transition;
+	begin
+		integer r, c;
+		for r := 1 step 1 until rows do
+			for c := 1 step 1 until cols do
+				surrogate.set_value(r, c, evolved(r, c));
+		flip_worlds;
+	end;
+
+	procedure transition_n(n); integer n;
+	begin
+		integer i;
+		for i := 1 step 1 until n do
+			transition;
+	end;
+
+	world :- new Board(rows, cols);
+	surrogate :- new Board(rows, cols);
+end-of-Conway;
+
+

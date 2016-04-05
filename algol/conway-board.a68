@@ -1,0 +1,65 @@
+#! /usr/local/bin/a68g --script #
+
+COMMENT
+	Procedures:
+		- board_new(INT, INT)
+		- board_initialize(REF BOARD)
+		- board_rows(REF BOARD)
+		- board_cols(REF BOARD)
+		- board_in_range(REF BOARD, INT, INT)
+		- board_value_or_zero(REF BOARD, INT, INT)
+		- board_set(REF BOARD, INT, INT, INT)
+		- board_matrix_iterate(REF BOARD, PROC (REF BOARD, INT, INT) VOID)
+COMMENT
+
+MODE BOARD = STRUCT (REF [,] INT matrix);
+
+PROC board_new = (INT rows, cols) REF BOARD : (
+	REF BOARD b := HEAP BOARD;
+	(matrix OF b) := HEAP [1:rows, 1:cols] INT;
+	board_initialize(b);
+	b
+);
+
+PROC board_initialize = (REF BOARD b) VOID : (
+	PROC set_zero = (REF BOARD b, INT r, INT c) VOID : board_set(b, r, c, 0);
+	board_matrix_iterate(b, set_zero)
+);
+
+PROC board_rows = (REF BOARD b) INT : (
+	1 ELEMS matrix OF b
+);
+
+PROC board_cols = (REF BOARD b) INT : (
+	2 ELEMS matrix OF b
+);
+
+PROC board_in_range = (REF BOARD b, INT r, INT c) BOOL : (
+	1 LE r AND 1 LE c AND r LE board_rows(b) AND c LE board_cols(b)
+);
+
+PROC board_value_or_zero = (REF BOARD b, INT r, INT c) INT : (
+	INT value := 0;
+	IF board_in_range(b, r, c) THEN
+		value := (matrix OF b)[r,c]
+	FI;
+	value
+);
+
+PROC board_set = (REF BOARD b, INT r, INT c, INT v) VOID : (
+	IF board_in_range(b, r, c) THEN
+		(matrix OF b)[r,c] := v
+	FI
+);
+
+PROC board_matrix_iterate = (REF BOARD b, PROC (REF BOARD, INT, INT) VOID f) VOID : (
+	INT rows = board_rows(b);
+	INT cols = board_cols(b);
+	FOR r FROM 1 TO rows DO
+		FOR c FROM 1 TO cols DO
+			f(b, r, c)
+		OD
+	OD
+);
+
+SKIP

@@ -1,0 +1,36 @@
+#! /usr/local/bin/a68g --script #
+
+PR include "conway-board.a68" PR;
+PR include "conway-world.a68" PR;
+PR include "conway-pattern-reader.a68" PR;
+
+PROC atoi = (STRING s) INT : (
+	INT n := 0;
+	FOR c TO UPB s DO
+		n *:= 10;
+		n +:= ABS s[c] - ABS "0"
+	OD;
+	n
+);
+
+PROC main = (INT speed, STRING file_name) VOID : (
+
+	REF CONWAY cw := conway_pattern_reader_new_world(file_name, rows - 1, columns);
+	REAL last := 0;
+	WHILE TRUE DO
+		IF (seconds - last) > (speed / 1000) THEN
+			last := seconds;
+			system("clear");
+			conway_fast_print(cw);
+			conway_evolve(cw)
+		FI		
+	OD
+);
+
+IF argc NE 5 THEN
+	print("Usage: conway-player SPEED_IN_MS PATTERN_FILE")
+ELSE
+	main(atoi(argv(4)), argv(5))
+FI;
+
+SKIP

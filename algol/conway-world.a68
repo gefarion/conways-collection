@@ -1,0 +1,97 @@
+#! /usr/local/bin/a68g --script #
+
+COMMENT
+	Procedures:
+		- conway_new(INT, INT)
+		- conway_flip_worlds(REF CONWAY)
+		- conway_toggle(REF CONWAY, INT, INT)
+		- conway_evolve(REF CONWAY)
+		- conway_evolve_n(REF CONWAY, INT)
+		- conway_print(REF CONWAY)
+		- conway_evolved_cell(REF BOARD, INT, INT)
+COMMENT
+
+MODE CONWAY = STRUCT (REF BOARD world, REF BOARD surrogate);
+
+REF CONWAY null_conway = NIL;
+
+PROC conway_new = (INT rows, cols) REF CONWAY : (
+	REF CONWAY c := HEAP CONWAY;
+	(surrogate OF c) := board_new(rows, cols);
+	(world OF c) := board_new(rows, cols);
+	c
+);
+
+PROC conway_flip_worlds = (REF CONWAY cw) VOID : (
+	REF BOARD s = (surrogate OF cw);
+	REF BOARD w = (world OF cw);
+	(surrogate OF cw) := w;
+	(world OF cw) := s
+);
+
+PROC conway_toggle = (REF CONWAY cw, INT r, c) VOID : (
+	REF BOARD w = (world OF cw);
+	INT value = board_value_or_zero(w, r, c);
+	board_set(w, r, c, 1 - value)
+);
+
+PROC conway_evolve = (REF CONWAY cw) VOID : (
+	REF BOARD s = (surrogate OF cw);
+	REF BOARD w = (world OF cw);
+	PROC update_surrogate = (REF BOARD b, INT r, INT c) VOID : (
+		board_set(s, r, c, conway_evolved_cell(b, r, c))
+	);
+	board_matrix_iterate(w, update_surrogate);
+	conway_flip_worlds(cw)
+);
+
+PROC conway_evolve_n = (REF CONWAY cw, INT n) VOID : (
+	FOR i TO n DO
+		conway_evolve(cw)
+	OD
+);
+
+PROC conway_rows = (REF CONWAY cw) INT: (
+	board_rows((world OF cw))
+);
+
+PROC conway_cols = (REF CONWAY cw) INT: (
+	board_cols((world OF cw))
+);
+
+PROC conway_fast_print = (REF CONWAY cw) VOID: (
+	INT rows = board_rows((world OF cw));
+	INT cols = board_cols((world OF cw));
+	FOR r TO rows DO
+		STRING line := "";
+		FOR c TO cols DO
+			line +:= (board_value_or_zero(world OF cw, r, c) = 0 | " " | "#")
+		OD;
+		print((line, new line))
+	OD
+);
+
+PROC conway_print = (REF CONWAY cw) VOID : (
+	INT cols = board_cols((world OF cw));
+	print(("~" * (2 * cols - 1), new line));
+	PROC pretty_print = (REF BOARD b, INT r, INT c) VOID : (
+		INT v = board_value_or_zero(b, r, c);
+		print((v = 0 | "." | "x" ));
+		print((c LT cols | " " | new line))
+	);
+	board_matrix_iterate((world OF cw), pretty_print);
+	print(new line)
+);
+
+PROC conway_evolved_cell = (REF BOARD b, INT r, INT c) INT : (
+	INT current = board_value_or_zero(b, r, c);
+	INT neighbors := -current;
+	FOR i FROM -1 TO 1 DO
+		FOR j FROM -1 TO 1 DO
+			neighbors := neighbors + board_value_or_zero(b, r + i, c + j)
+		OD
+	OD;
+	(neighbors = 2 | current |: neighbors = 3 | 1 | 0)
+);
+
+SKIP

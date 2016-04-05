@@ -1,0 +1,93 @@
+class UNIX; ! bidon ;  ;
+	
+	text procedure Arg(n);    integer n;
+! ------------------------------------------------- ;
+	if n>=0 and n < ArgC then
+	begin
+	    integer Args, A;
+	    Args := ArgV;
+	    A  := peek(Args + 4*n);
+#ifdef BIT64
+	    A  := peek(Args + 8*n);
+#endif
+	    Arg :- CtoSText(A);
+	end;
+
+	text procedure Env(T);    Text T;
+! ------------------------------------------------- ;
+	begin
+	
+		External C procedure getenv is
+		   integer procedure getenv(t); text t;;
+		
+		integer ADR;
+				
+		ADR := getenv(T);
+		if ADR = 0
+			then Env :- notext
+			else Env :- CtoSText(ADR)
+		
+	end *** Env ***;
+
+	
+   Integer procedure System(T); text T;
+! ======================================= ;
+   begin
+       external C procedure system is integer procedure sys(T); text T;;
+       System := sys( T & "!0!");
+   end;
+      
+    
+! --------------------------------------------
+	CtoSText:  from the address of a zero terminated
+	"C" string, this function creates a SIMULA TEXT with the
+	same value. The ZERO terminator is stripped off.
+------------------------------------------------------ ;
+	
+text procedure CtoSText( Adr ); integer Adr;
+begin
+	external C procedure strlen is
+	   integer procedure STRLEN(t); integer t;;
+	external C procedure strncpy is
+	   integer procedure STRNCPY(t,t2,n); text t;
+			                           integer t2,n ; ;
+	text 	t;
+	integer len, res;
+	
+    len  := strlen(Adr);
+    t    :- blanks(len);
+    res  := strncpy(t,Adr,len);
+    CtoSText :- t;
+end  *** CtoSText *** ;
+
+
+	integer procedure PEEK(adr); integer adr;
+! ------------------------------------------------- ;
+	begin
+		external C procedure c_peek32 is
+		   integer procedure cpeek(adr); integer adr;;
+		   
+		peek := cpeek(adr);
+	end;
+	
+	integer procedure PEEK16(adr); integer adr;
+! ------------------------------------------------- ;
+	begin
+		external C procedure c_peek16 is
+		   integer procedure cpeek(adr); integer adr;;
+		   
+		peek16 := cpeek(adr);
+	end;
+	
+	integer procedure PEEK8(adr); integer adr;
+! ------------------------------------------------- ;
+	begin
+		external C procedure c_peek8 is
+		   integer procedure cpeek(adr); integer adr;;
+		   
+		peek8 := cpeek(adr);
+	end;
+			
+
+! ============== Fin de UNIX ========================= ;
+

@@ -1,0 +1,46 @@
+#! /usr/local/bin/a68g --script #
+
+COMMENT
+	Procedures:
+		- conway_reader_input_file
+		- conway_reader_read(REF FILE)
+		- conway_reader_new_world
+COMMENT
+
+PROC conway_reader_input_file = STRING : (
+	STRING file_name;
+	print("Enter input board file: ");
+	read (file_name);
+	print (new line);
+	file_name
+);
+
+PROC conway_reader_read = (REF FILE file) REF CONWAY : (
+	INT rows, cols;
+	get(file, (rows, cols));
+	REF CONWAY cw := conway_new(rows, cols);
+	FOR r TO rows DO
+		FOR c TO cols DO
+			INT v;
+			get(file, v);
+			IF v EQ 1 THEN
+				conway_toggle(cw, r, c)
+			FI
+		OD
+	OD;
+	cw
+);
+
+PROC conway_reader_new_world = REF CONWAY : (
+	STRING file_name = conway_reader_input_file;
+	REF CONWAY cw := null_conway;
+	FILE input;
+	IF open(input, file_name, stand in channel) EQ 0 THEN
+		cw := conway_reader_read(input)
+	ELSE
+		print (("Error reading input file: ", file_name))
+	FI;
+	cw
+);
+
+SKIP

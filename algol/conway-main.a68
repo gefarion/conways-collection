@@ -1,0 +1,21 @@
+#! /usr/local/bin/a68g --script #
+
+PR include "conway-board.a68" PR;
+PR include "conway-world.a68" PR;
+PR include "conway-reader.a68" PR;
+
+INT transitions = 10;
+
+PROC main = (INT steps) VOID : (
+	REF CONWAY cw := conway_reader_new_world;
+	IF cw ISNT null_conway THEN
+		FOR i TO steps DO
+			conway_print(cw);
+			conway_evolve(cw)
+		OD
+	FI
+);
+
+main(transitions);
+
+SKIP

@@ -1,0 +1,51 @@
+external class Conway;
+
+class PatternReader;
+begin
+
+	Boolean procedure read_line(game, row, file); Ref(Conway) game; integer row; ref(InFile) file;
+	begin
+		text line;
+		character c;
+		integer col;
+
+		read_line := false;
+
+		file.InImage;
+		line :- file.Image;
+
+		col :=  game.world.cols / 6;
+		c := line.GetChar;
+		while (c EQ '.' or c EQ 'O') and line.More do
+		begin
+			if c EQ 'O' then
+				game.toggle(row, col);
+
+			col := col + 1;
+			c := line.GetChar;
+			read_line := true;
+		end
+	end;
+
+	Boolean procedure read_on(game, filename); text filename; Ref(Conway) game;
+	begin
+		
+		ref(InFile) file;
+
+		file :- new InFile(filename);
+		if file.Open(Blanks(200)) then
+		begin
+			integer row;
+			row := game.world.rows / 6;
+			while not file.endFile do
+				if read_line(game, row, file) then
+					row := row + 1;
+			read_on := true;
+		end
+		else
+			read_on := false;
+
+		file.Close
+	end;
+
+end-of-PatternReader;

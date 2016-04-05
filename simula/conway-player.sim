@@ -1,0 +1,32 @@
+external class Conway;
+external class UNIX;
+external class PatternReader;
+
+begin
+	if argc = 4 then
+	begin
+		ref(Conway) game;
+		ref(PatternReader) reader;
+
+		game :- new Conway(arg(1).getInt, arg(2).getInt);
+
+		reader :- new PatternReader;
+		if reader.read_on(game, arg(3)) then
+		begin
+			while true do
+			begin
+				game.world.print(1);
+				game.transition;
+			end
+		end
+		else
+		begin
+			OutText("Error al leer el archivo: ");
+			OutText(arg(3));
+			OutImage;
+		end
+	end
+	else
+		OutText("Uso: ./conway-player ROWS COLS PATTERN-FILE");
+
+end-of-file
